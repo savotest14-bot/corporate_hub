@@ -289,7 +289,7 @@ THE CORPORATE HUB™
 
 <br><br>
 
-A Brand of EquusChain Ltd.<br>
+A Brand of Corporate Hub Ltd.<br>
 
 ADGM, Al Maryah Island<br>
 

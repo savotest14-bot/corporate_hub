@@ -2173,7 +2173,7 @@ const RequestAccessModal = ({ isOpen, onClose, defaultType = "membership" }) => 
       const payload = { formType: type, ...form };
       console.log("Submitting form data to API:", payload);
 
-      const res = await fetch("https://3d43-106-222-213-73.ngrok-free.app/api/mail_handler.php", {
+      const res = await fetch("https://thecorporatehub.org/api/mail_handler.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

@@ -1,0 +1,578 @@
+<?php
+
+header("Content-Type: application/json; charset=UTF-8");
+
+// Allow local React dev server.
+// Change this to your domain in production.
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    http_response_code(200);
+    exit;
+}
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    http_response_code(405);
+    echo json_encode([
+        "success" => false,
+        "message" => "Method not allowed."
+    ]);
+    exit;
+}
+
+require_once __DIR__ . "/../vendor/autoload.php";
+require_once __DIR__ . "/mail_config.php";
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Read JSON
+$input = json_decode(file_get_contents("php://input"), true);
+
+if (!$input) {
+    http_response_code(400);
+    echo json_encode([
+        "success" => false,
+        "message" => "Invalid JSON payload."
+    ]);
+    exit;
+}
+
+// Sanitize
+$formType = trim($input["formType"] ?? "membership");
+
+$firstName = htmlspecialchars(trim($input["firstName"] ?? ""));
+$lastName  = htmlspecialchars(trim($input["lastName"] ?? ""));
+$email     = filter_var(trim($input["email"] ?? ""), FILTER_VALIDATE_EMAIL);
+$orgName   = htmlspecialchars(trim($input["orgName"] ?? ""));
+$orgType   = htmlspecialchars(trim($input["orgType"] ?? ""));
+$sector    = htmlspecialchars(trim($input["sector"] ?? ""));
+$country   = htmlspecialchars(trim($input["country"] ?? ""));
+$message   = nl2br(htmlspecialchars(trim($input["message"] ?? "")));
+
+if (
+    empty($firstName) ||
+    empty($lastName) ||
+    !$email ||
+    empty($orgName)
+) {
+    http_response_code(400);
+
+    echo json_encode([
+        "success" => false,
+        "message" => "Please fill all required fields."
+    ]);
+
+    exit;
+}
+
+if ($formType === "membership") {
+
+    $subject = "New Request Access Submission";
+
+   $body = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>New Membership Request</title>
+
+<style>
+
+body{
+margin:0;
+padding:0;
+background:#f4f6f9;
+font-family:Arial,Helvetica,sans-serif;
+color:#3d4c54;
+}
+
+.wrapper{
+width:100%;
+padding:40px 0;
+}
+
+.container{
+max-width:720px;
+margin:auto;
+background:#ffffff;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.header{
+background:linear-gradient(135deg,#082022,#0f474a);
+padding:45px;
+text-align:center;
+}
+
+.logo{
+max-width:230px;
+}
+
+.badge{
+display:inline-block;
+margin-top:18px;
+padding:8px 20px;
+background:#cba34b;
+color:#fff;
+border-radius:30px;
+font-size:12px;
+font-weight:bold;
+letter-spacing:1px;
+}
+
+.content{
+padding:45px;
+}
+
+h1{
+margin:0 0 15px;
+color:#0b3d41;
+font-size:30px;
+}
+
+p{
+line-height:1.8;
+font-size:15px;
+color:#66757d;
+}
+
+.section-title{
+margin-top:35px;
+margin-bottom:15px;
+font-size:18px;
+font-weight:bold;
+color:#0d3d40;
+border-left:4px solid #cba34b;
+padding-left:12px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+td{
+padding:16px;
+border-bottom:1px solid #ececec;
+}
+
+.label{
+width:35%;
+background:#f7f9fb;
+font-weight:bold;
+color:#0d3d40;
+}
+
+.footer{
+background:#082022;
+padding:35px;
+text-align:center;
+color:#d8d8d8;
+font-size:13px;
+line-height:1.8;
+}
+
+.footer a{
+color:#cba34b;
+text-decoration:none;
+}
+
+.social{
+margin-top:20px;
+}
+
+.social span{
+display:inline-block;
+margin:0 8px;
+padding:8px 12px;
+border:1px solid rgba(255,255,255,.15);
+border-radius:30px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="container">
+
+<div class="header">
+
+<img src="https://thecorporatehub.ae/logo.png" class="logo">
+
+<br>
+
+<div class="badge">
+NEW MEMBERSHIP REQUEST
+</div>
+
+</div>
+
+<div class="content">
+
+<h1>New Membership Application</h1>
+
+<p>
+A new membership application has been submitted through
+<strong>The Corporate Hub™</strong>.
+Below are the applicant details.
+</p>
+
+<div class="section-title">
+Applicant Information
+</div>
+
+<table>
+
+<tr>
+<td class="label">First Name</td>
+<td>'.$firstName.'</td>
+</tr>
+
+<tr>
+<td class="label">Last Name</td>
+<td>'.$lastName.'</td>
+</tr>
+
+<tr>
+<td class="label">Email Address</td>
+<td>'.$email.'</td>
+</tr>
+
+<tr>
+<td class="label">Organisation</td>
+<td>'.$orgName.'</td>
+</tr>
+
+<tr>
+<td class="label">Organisation Type</td>
+<td>'.$orgType.'</td>
+</tr>
+
+<tr>
+<td class="label">Sector</td>
+<td>'.$sector.'</td>
+</tr>
+
+<tr>
+<td class="label">Country</td>
+<td>'.$country.'</td>
+</tr>
+
+<tr>
+<td class="label">Submitted On</td>
+<td>'.date("d M Y • h:i A").'</td>
+</tr>
+
+<tr>
+<td class="label">IP Address</td>
+<td>'.($_SERVER["REMOTE_ADDR"] ?? "Unknown").'</td>
+</tr>
+
+</table>
+
+</div>
+
+<div class="footer">
+
+<strong style="color:#fff;font-size:18px;">
+THE CORPORATE HUB™
+</strong>
+
+<br><br>
+
+A Brand of EquusChain Ltd.<br>
+
+ADGM, Al Maryah Island<br>
+
+Abu Dhabi, UAE
+
+<br><br>
+
+<a href="https://thecorporatehub.ae">
+www.thecorporatehub.ae
+</a>
+
+<div class="social">
+
+<span>Business Network</span>
+
+<span>Membership</span>
+
+<span>Innovation</span>
+
+</div>
+
+<br>
+
+This email was automatically generated by
+The Corporate Hub™ Website.
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>';
+
+} else {
+
+    if (empty($message)) {
+
+        http_response_code(400);
+
+        echo json_encode([
+            "success" => false,
+            "message" => "Message is required."
+        ]);
+
+        exit;
+    }
+
+    $subject = "New Contact Enquiry";
+
+   $body='
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<style>
+
+body{
+margin:0;
+background:#f4f6f9;
+font-family:Arial;
+}
+
+.container{
+max-width:720px;
+margin:40px auto;
+background:#fff;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.header{
+background:linear-gradient(135deg,#082022,#0d4649);
+padding:45px;
+text-align:center;
+}
+
+.logo{
+width:220px;
+}
+
+.title{
+padding:45px;
+}
+
+.title h1{
+margin:0;
+font-size:30px;
+color:#0d3d40;
+}
+
+.title p{
+line-height:1.8;
+color:#666;
+}
+
+.card{
+margin:0 45px 45px;
+border:1px solid #ececec;
+border-radius:10px;
+overflow:hidden;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+td{
+padding:16px;
+border-bottom:1px solid #eee;
+}
+
+.label{
+background:#fafafa;
+width:35%;
+font-weight:bold;
+}
+
+.message{
+padding:25px;
+background:#fbfbfb;
+line-height:1.8;
+}
+
+.footer{
+background:#082022;
+color:#ddd;
+padding:35px;
+text-align:center;
+font-size:13px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+
+<img src="https://thecorporatehub.ae/logo.png" class="logo">
+
+</div>
+
+<div class="title">
+
+<h1>New Contact Enquiry</h1>
+
+<p>
+A visitor has submitted a new enquiry from
+The Corporate Hub™ website.
+</p>
+
+</div>
+
+<div class="card">
+
+<table>
+
+<tr>
+<td class="label">First Name</td>
+<td>'.$firstName.'</td>
+</tr>
+
+<tr>
+<td class="label">Last Name</td>
+<td>'.$lastName.'</td>
+</tr>
+
+<tr>
+<td class="label">Email</td>
+<td>'.$email.'</td>
+</tr>
+
+<tr>
+<td class="label">Organisation</td>
+<td>'.$orgName.'</td>
+</tr>
+
+<tr>
+<td class="label">Submitted</td>
+<td>'.date("d M Y • h:i A").'</td>
+</tr>
+
+<tr>
+<td class="label">IP Address</td>
+<td>'.($_SERVER["REMOTE_ADDR"] ?? "Unknown").'</td>
+</tr>
+
+</table>
+
+<div class="message">
+
+<strong>Message</strong>
+
+<br><br>
+
+'.$message.'
+
+</div>
+
+</div>
+
+<div class="footer">
+
+<strong style="color:#fff;font-size:18px;">
+THE CORPORATE HUB™
+</strong>
+
+<br><br>
+
+ADGM, Al Maryah Island<br>
+
+Abu Dhabi, UAE
+
+<br><br>
+
+www.thecorporatehub.ae
+
+<br><br>
+
+This notification was automatically generated by
+The Corporate Hub™ website.
+
+</div>
+
+</div>
+
+</body>
+
+</html>';
+}
+
+try {
+
+    $mail = new PHPMailer(true);
+
+    $mail->isSMTP();
+
+    $mail->Host = SMTP_HOST;
+    $mail->SMTPAuth = true;
+    $mail->Username = SMTP_USER;
+    $mail->Password = SMTP_PASS;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = SMTP_PORT;
+
+    $mail->CharSet = "UTF-8";
+
+    $mail->setFrom(SENDER_EMAIL, SENDER_NAME);
+
+    $mail->addAddress(ADMIN_EMAIL);
+
+    $mail->addReplyTo($email, $firstName . " " . $lastName);
+
+    $mail->isHTML(true);
+
+    $mail->Subject = $subject;
+
+    $mail->Body = $body;
+
+    $mail->AltBody = strip_tags($body);
+
+    $mail->send();
+
+    echo json_encode([
+        "success" => true,
+        "message" => "Request submitted successfully."
+    ]);
+
+} catch (Exception $e) {
+
+    http_response_code(500);
+
+    echo json_encode([
+        "success" => false,
+        "message" => $mail->ErrorInfo
+    ]);
+}

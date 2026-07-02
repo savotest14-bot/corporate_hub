@@ -1,0 +1,13 @@
+
+RewriteEngine On
+
+# Don't rewrite existing files
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Don't rewrite PHP endpoints
+RewriteRule ^api/ - [L]
+
+# React SPA
+RewriteRule . /index.html [L]

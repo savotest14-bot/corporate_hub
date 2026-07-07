@@ -206,7 +206,7 @@ border-radius:30px;
 
 <div class="header">
 
-<img src="https://thecorporatehub.org/logo.png" class="logo">
+<img src="https://thecorporatehub.org/logo5.png" class="logo">
 
 <br>
 
@@ -438,7 +438,7 @@ font-size:13px;
 
 <div class="header">
 
-<img src="https://thecorporatehub.org/logo.png" class="logo">
+<img src="https://thecorporatehub.org/logo5.png" class="logo">
 
 </div>
 

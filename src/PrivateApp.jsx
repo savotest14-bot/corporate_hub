@@ -476,10 +476,27 @@ const AuthScreen = ({ onLogin, currentLang, onLangChange }) => {
   ];
 
   const sectors = [
-    { value: "Financial Services", label: "Financial Services / Private Equity" },
-    { value: "Legal", label: "Legal & Compliance" },
-    { value: "Technology", label: "Technology / AI" },
-    { value: "Consulting", label: "Management Consulting" }
+    { value: "Financial Services & FinTechs", label: "Financial Services & FinTechs" },
+    { value: "Technology & AI", label: "Technology & AI" },
+    { value: "Blockchain, Web3 & Digital Assets", label: "Blockchain, Web3 & Digital Assets" },
+    { value: "Legal, Compliance & Governance", label: "Legal, Compliance & Governance" },
+    { value: "Accounting, Tax & Audit", label: "Accounting, Tax & Audit" },
+    { value: "Strategy & Management Consulting", label: "Strategy & Management Consulting" },
+    { value: "Real Estate & Infrastructure", label: "Real Estate & Infrastructure" },
+    { value: "Healthcare & Life Sciences", label: "Healthcare & Life Sciences" },
+    { value: "Manufacturing & Industrial", label: "Manufacturing & Industrial" },
+    { value: "Energy & Natural Resources", label: "Energy & Natural Resources" },
+    { value: "Agriculture & Food", label: "Agriculture & Food" },
+    { value: "Consumer Goods & Retail", label: "Consumer Goods & Retail" },
+    { value: "Luxury Goods & Lifestyle", label: "Luxury Goods & Lifestyle" },
+    { value: "Hospitality & Tourism", label: "Hospitality & Tourism" },
+    { value: "Logistics & Supply Chain", label: "Logistics & Supply Chain" },
+    { value: "Telecommunications", label: "Telecommunications" },
+    { value: "Media, Marketing & Communications", label: "Media, Marketing & Communications" },
+    { value: "Education & Training", label: "Education & Training" },
+    { value: "Non-Profit & Foundation", label: "Non-Profit & Foundation" },
+    { value: "Family Office", label: "Family Office" },
+    { value: "Other", label: "Other" }
   ];
 
   const handleRegisterSubmit = async (e) => {
@@ -554,7 +571,7 @@ const AuthScreen = ({ onLogin, currentLang, onLangChange }) => {
 
         {/* Footnote disclaimer info */}
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", fontFamily: ff.sans, margin: 0 }}>
-          &copy; 2026 The Corporate Hub. All rights reserved.
+          &copy; 2026 The Corporate Hub, {t("footer.brandOf")} {t("footer.rights")}
         </p>
       </div>
 

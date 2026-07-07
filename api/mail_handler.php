@@ -206,7 +206,7 @@ border-radius:30px;
 
 <div class="header">
 
-<img src="https://thecorporatehub.ae/logo.png" class="logo">
+<img src="https://thecorporatehub.org/logo.png" class="logo">
 
 <br>
 
@@ -297,8 +297,8 @@ Abu Dhabi, UAE
 
 <br><br>
 
-<a href="https://thecorporatehub.ae">
-www.thecorporatehub.ae
+<a href="https://thecorporatehub.org">
+www.thecorporatehub.org
 </a>
 
 <div class="social">
@@ -438,7 +438,7 @@ font-size:13px;
 
 <div class="header">
 
-<img src="https://thecorporatehub.ae/logo.png" class="logo">
+<img src="https://thecorporatehub.org/logo.png" class="logo">
 
 </div>
 
@@ -515,7 +515,7 @@ Abu Dhabi, UAE
 
 <br><br>
 
-www.thecorporatehub.ae
+www.thecorporatehub.org
 
 <br><br>
 

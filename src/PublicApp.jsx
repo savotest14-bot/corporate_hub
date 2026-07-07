@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./i18n";
+import { countries } from "./countries";
 
 // Constant links
 const TERMS_URL = "/terms";
@@ -343,8 +344,8 @@ const Nav = ({ onApply, currentLang, onLangChange, isMobile }) => {
     { label: t("nav.overview"), id: "Overview" },
     { label: t("nav.network"), id: "TheNetwork" },
     { label: t("nav.capabilities"), id: "Capabilities" },
-    { label: t("nav.membership"), id: "Membership" },
-    { label: t("nav.ecosystem"), id: "Ecosystem" }
+    { label: t("nav.ecosystem"), id: "Ecosystem" },
+    { label: t("nav.membership"), id: "Membership" }
   ];
 
   return (
@@ -555,7 +556,6 @@ const Hero = ({ onApply, isMobile }) => {
         {/* Left Column */}
         <div style={{ position: "relative", zIndex: 1 }}>
           <Reveal>
-            <Eyebrow light>{t("ecosystem.eyebrow")}</Eyebrow>
             <h1
               style={{
                 fontFamily: "'Playfair Display', Georgia, serif",
@@ -709,23 +709,29 @@ const Hero = ({ onApply, isMobile }) => {
 
             {/* Central Glowing Orb with logo emblem watermark */}
             <div style={{
-              width: 80,
-              height: 80,
+              width: 180,
+              height: 180,
               borderRadius: "50%",
               background: `linear-gradient(135deg, ${T.teal800} 0%, ${T.teal900} 100%)`,
               border: `2px solid ${T.gold}`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(201, 168, 76, 0.2)",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.35), 0 0 30px rgba(201, 168, 76, 0.25)",
               zIndex: 2,
               position: "relative",
               pointerEvents: "none"
             }}>
-              {/* Gold brand initial emblem monogram inside */}
-              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: T.gold, fontWeight: 500, letterSpacing: "0.05em" }}>
-                TCH
-              </span>
+              <img
+                src="/logo.png"
+                alt="Logo"
+                style={{
+                  maxWidth: "80%",
+                  maxHeight: "80%",
+                  objectFit: "contain",
+                  filter: "brightness(0) invert(1)"
+                }}
+              />
             </div>
 
             {/* Tiny satellite glowing dots */}
@@ -1483,26 +1489,7 @@ const Membership = ({ onApply, isMobile }) => {
                   : "0 2px 12px rgba(13,61,64,0.05)",
               }}>
 
-                {/* Featured crown badge */}
-                {tier.featured && (
-                  <div style={{
-                    position: "absolute",
-                    top: -14,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: `linear-gradient(135deg, ${T.gold} 0%, ${T.goldLt} 100%)`,
-                    color: T.teal900,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    padding: "5px 16px",
-                    borderRadius: 20,
-                    whiteSpace: "nowrap",
-                  }}>
-                    ★ Most Popular
-                  </div>
-                )}
+
 
                 <div>
                   {/* Tag pill */}
@@ -1829,8 +1816,9 @@ const Footer = ({ onApply, onContact, onResetCookies, isMobile }) => {
       ],
     },
     {
-      title: "",
-      links: [{ label: t("footer.col3_title"), href: "https://www.equuschain.com", external: true }],
+      title: t("footer.col3_title"),
+      titleLink: "https://equuschain.io/",
+      links: [{ label: t("footer.equuschainPortal"), href: "https://equuschain.io/", external: true }],
     },
   ];
 
@@ -1892,7 +1880,18 @@ const Footer = ({ onApply, onContact, onResetCookies, isMobile }) => {
                     marginTop: 0,
                   }}
                 >
-                  {col.title}
+                  {col.titleLink ? (
+                    <a
+                      href={col.titleLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: T.gold, textDecoration: "none" }}
+                    >
+                      {col.title}
+                    </a>
+                  ) : (
+                    col.title
+                  )}
                 </h5>
               )}
               <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
@@ -2050,7 +2049,7 @@ const Footer = ({ onApply, onContact, onResetCookies, isMobile }) => {
         }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>
-              &copy; 2026 The Corporate Hub &mdash; {t("footer.brandOf")} {t("footer.rights")}
+              &copy; 2026 The Corporate Hub, {t("footer.brandOf")} {t("footer.rights")}
             </div>
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", display: "flex", alignItems: "center", gap: 6 }}>
               <span>🇦🇪</span> {t("footer.address")}
@@ -2101,6 +2100,121 @@ const Footer = ({ onApply, onContact, onResetCookies, isMobile }) => {
   );
 };
 
+// ─── Searchable Select Component for Dropdowns with search
+const SearchableSelect = ({ label, value, onChange, options, labelStyle, inputStyle, placeholder = "Select..." }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const filteredOptions = options.filter(o => 
+    o.label.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div ref={containerRef} style={{ position: "relative", marginBottom: "1rem" }}>
+      {label && <label style={labelStyle}>{label}</label>}
+      <div 
+        onClick={() => { setIsOpen(!isOpen); setSearch(""); }}
+        style={{
+          ...inputStyle,
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          userSelect: "none"
+        }}
+      >
+        <span>{selectedOption && selectedOption.value ? selectedOption.label : placeholder}</span>
+        <span style={{ fontSize: 10, color: "rgba(0,0,0,0.3)" }}>▼</span>
+      </div>
+
+      {isOpen && (
+        <div style={{
+          position: "absolute",
+          top: "100%",
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          background: "#fff",
+          border: "1px solid rgba(0,0,0,0.15)",
+          borderRadius: 6,
+          boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+          marginTop: 4,
+          maxHeight: 250,
+          display: "flex",
+          flexDirection: "column"
+        }}>
+          <input
+            type="text"
+            placeholder="Type to search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClick={(e) => e.stopPropagation()} // Prevent dropdown closing on click inside search
+            style={{
+              padding: "10px 12px",
+              border: "none",
+              borderBottom: "1px solid rgba(0,0,0,0.08)",
+              outline: "none",
+              fontSize: 13,
+              width: "100%",
+              boxSizing: "border-box"
+            }}
+          />
+          <div style={{ overflowY: "auto", flex: 1, maxHeight: 180 }}>
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((o) => (
+                <div
+                  key={o.value}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(o.value);
+                    setIsOpen(false);
+                  }}
+                  style={{
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    fontSize: 13,
+                    background: o.value === value ? "rgba(39, 132, 139, 0.08)" : "transparent",
+                    color: o.value === value ? "#27848b" : "#111827"
+                  }}
+                  onMouseEnter={(e) => {
+                    if (o.value !== value) {
+                      e.target.style.background = "#f9f9f9";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (o.value !== value) {
+                      e.target.style.background = "transparent";
+                    }
+                  }}
+                >
+                  {o.label}
+                </div>
+              ))
+            ) : (
+              <div style={{ padding: "10px 12px", fontSize: 13, color: "#9ca3af" }}>
+                No results found
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Request Access / Contact Modal
 const RequestAccessModal = ({ isOpen, onClose, defaultType = "membership" }) => {
   const { t, i18n } = useTranslation();
@@ -2130,11 +2244,30 @@ const RequestAccessModal = ({ isOpen, onClose, defaultType = "membership" }) => 
   ];
 
   const sectors = [
-    { value: "Financial Services", label: "Financial Services / Private Equity" },
-    { value: "Legal", label: "Legal / Compliance / Governance" },
-    { value: "Technology", label: "Technology / Fintech / AI" },
-    { value: "Consulting", label: "Strategy & Management Consulting" },
+    { value: "Financial Services & FinTechs", label: "Financial Services & FinTechs" },
+    { value: "Technology & AI", label: "Technology & AI" },
+    { value: "Blockchain, Web3 & Digital Assets", label: "Blockchain, Web3 & Digital Assets" },
+    { value: "Legal, Compliance & Governance", label: "Legal, Compliance & Governance" },
+    { value: "Accounting, Tax & Audit", label: "Accounting, Tax & Audit" },
+    { value: "Strategy & Management Consulting", label: "Strategy & Management Consulting" },
+    { value: "Real Estate & Infrastructure", label: "Real Estate & Infrastructure" },
+    { value: "Healthcare & Life Sciences", label: "Healthcare & Life Sciences" },
+    { value: "Manufacturing & Industrial", label: "Manufacturing & Industrial" },
+    { value: "Energy & Natural Resources", label: "Energy & Natural Resources" },
+    { value: "Agriculture & Food", label: "Agriculture & Food" },
+    { value: "Consumer Goods & Retail", label: "Consumer Goods & Retail" },
+    { value: "Luxury Goods & Lifestyle", label: "Luxury Goods & Lifestyle" },
+    { value: "Hospitality & Tourism", label: "Hospitality & Tourism" },
+    { value: "Logistics & Supply Chain", label: "Logistics & Supply Chain" },
+    { value: "Telecommunications", label: "Telecommunications" },
+    { value: "Media, Marketing & Communications", label: "Media, Marketing & Communications" },
+    { value: "Education & Training", label: "Education & Training" },
+    { value: "Non-Profit & Foundation", label: "Non-Profit & Foundation" },
+    { value: "Family Office", label: "Family Office" },
+    { value: "Other", label: "Other" }
   ];
+
+
 
   useEffect(() => {
     if (isOpen) {
@@ -2173,7 +2306,7 @@ const RequestAccessModal = ({ isOpen, onClose, defaultType = "membership" }) => 
       const payload = { formType: type, ...form };
       console.log("Submitting form data to API:", payload);
 
-      const res = await fetch("https://thecorporatehub.org/api/mail_handler.php", {
+      const res = await fetch("https://3d43-106-222-213-73.ngrok-free.app/api/mail_handler.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -2451,13 +2584,14 @@ const RequestAccessModal = ({ isOpen, onClose, defaultType = "membership" }) => 
                       ))}
                     </select>
 
-                    <label style={labelStyle}>{t("modal.country")}</label>
-                    <input
-                      style={inputStyle}
+                    <SearchableSelect
+                      label={t("modal.country")}
                       value={form.country}
-                      onChange={handleChange("country")}
-                      placeholder="e.g. United Kingdom"
-                      required
+                      onChange={(val) => setForm(p => ({ ...p, country: val }))}
+                      options={countries}
+                      labelStyle={labelStyle}
+                      inputStyle={inputStyle}
+                      placeholder="Select Country..."
                     />
 
                     <button
@@ -2827,6 +2961,25 @@ export default function CorporateHub() {
     window.location.reload();
   };
 
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        setScrollProgress(window.scrollY / totalHeight);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   useEffect(() => {
     handleLangChange(currentLang);
   }, []);
@@ -2859,6 +3012,70 @@ export default function CorporateHub() {
         defaultType={modalType}
       />
       <CookieBanner onAccept={() => { }} onRefuse={() => { }} />
+
+      {/* Floating Back to Top Button */}
+      <button
+        onClick={scrollToTop}
+        style={{
+          position: "fixed",
+          bottom: isMobile ? "2rem" : "3rem",
+          right: isMobile ? "1.5rem" : "3rem",
+          width: 48,
+          height: 48,
+          borderRadius: "50%",
+          background: T.teal800,
+          border: "none",
+          color: T.gold,
+          fontSize: 20,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 16px rgba(13, 61, 64, 0.25)",
+          zIndex: 150,
+          opacity: showScrollTop ? 1 : 0,
+          visibility: showScrollTop ? "visible" : "hidden",
+          transform: showScrollTop ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease, color 0.2s ease",
+          outline: "none",
+          padding: 0,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = T.teal700;
+          e.currentTarget.style.color = "#fff";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = T.teal800;
+          e.currentTarget.style.color = T.gold;
+        }}
+        title="Back to Top"
+      >
+        <svg width="48" height="48" viewBox="0 0 48 48" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", pointerEvents: "none" }}>
+          {/* Background Track Circle */}
+          <circle
+            cx="24"
+            cy="24"
+            r="22"
+            fill="transparent"
+            stroke="rgba(201,168,76,0.15)"
+            strokeWidth="2.5"
+          />
+          {/* Active Filling Progress Circle */}
+          <circle
+            cx="24"
+            cy="24"
+            r="22"
+            fill="transparent"
+            stroke={T.gold}
+            strokeWidth="2.5"
+            strokeDasharray="138.23"
+            strokeDashoffset={138.23 - (138.23 * scrollProgress)}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 0.05s linear" }}
+          />
+        </svg>
+        <span style={{ position: "relative", zIndex: 2, pointerEvents: "none", top: -1 }}>↑</span>
+      </button>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./i18n";
 import "./LoginApp.css";
+import { countries } from "./countries";
 
 const TERMS_URL = "/terms";
 const PRIVACY_URL = "/privacy";
@@ -169,6 +170,125 @@ const Select = ({ label, value, onChange, options }) => (
   </div>
 );
 
+const SearchableSelect = ({ label, value, onChange, options, placeholder = "Select..." }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const filteredOptions = options.filter(o => 
+    o.label.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div ref={containerRef} style={{ position: "relative", marginBottom: "1rem" }}>
+      {label && <label style={{
+        display: "block", fontSize: 12, fontWeight: 500,
+        color: C.teal800, marginBottom: 5, fontFamily: ff.sans
+      }}>{label}</label>}
+      <div 
+        onClick={() => { setIsOpen(!isOpen); setSearch(""); }}
+        style={{
+          width: "100%", padding: "15px 16px",
+          border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 13, fontFamily: ff.sans,
+          color: value ? C.dark : "#9CA3AF", background: C.white, outline: "none", cursor: "pointer",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          boxSizing: "border-box", userSelect: "none"
+        }}
+      >
+        <span>{selectedOption && selectedOption.value ? selectedOption.label : placeholder}</span>
+        <span style={{ fontSize: 10, color: "rgba(0,0,0,0.3)" }}>▼</span>
+      </div>
+
+      {isOpen && (
+        <div style={{
+          position: "absolute",
+          top: "100%",
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          background: C.white,
+          border: `1px solid ${C.border}`,
+          borderRadius: 6,
+          boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+          marginTop: 4,
+          maxHeight: 250,
+          display: "flex",
+          flexDirection: "column"
+        }}>
+          <input
+            type="text"
+            placeholder="Type to search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClick={(e) => e.stopPropagation()} // Prevent dropdown closing on click inside search
+            style={{
+              padding: "10px 12px",
+              border: "none",
+              borderBottom: "1px solid rgba(0,0,0,0.08)",
+              outline: "none",
+              fontSize: 13,
+              fontFamily: ff.sans,
+              width: "100%",
+              boxSizing: "border-box"
+            }}
+          />
+          <div style={{ overflowY: "auto", flex: 1, maxHeight: 180 }}>
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((o) => (
+                <div
+                  key={o.value}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(o.value);
+                    setIsOpen(false);
+                  }}
+                  style={{
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    fontSize: 13,
+                    fontFamily: ff.sans,
+                    background: o.value === value ? "rgba(39, 132, 139, 0.08)" : "transparent",
+                    color: o.value === value ? "#27848b" : C.dark
+                  }}
+                  onMouseEnter={(e) => {
+                    if (o.value !== value) {
+                      e.target.style.background = "#f9f9f9";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (o.value !== value) {
+                      e.target.style.background = "transparent";
+                    }
+                  }}
+                >
+                  {o.label}
+                </div>
+              ))
+            ) : (
+              <div style={{ padding: "10px 12px", fontSize: 13, fontFamily: ff.sans, color: "#9ca3af" }}>
+                No results found
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 // ─── Custom Language Dropdown (Styled after Reference Image)
 const LanguageDropdown = ({ currentLang, onLangChange, dark = false }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -319,11 +439,30 @@ const AuthScreen = ({ onLogin, currentLang, onLangChange }) => {
   ];
 
   const sectors = [
-    { value: "Financial Services", label: "Financial Services / Private Equity" },
-    { value: "Legal", label: "Legal & Compliance" },
-    { value: "Technology", label: "Technology / AI" },
-    { value: "Consulting", label: "Management Consulting" }
+    { value: "Financial Services & FinTechs", label: "Financial Services & FinTechs" },
+    { value: "Technology & AI", label: "Technology & AI" },
+    { value: "Blockchain, Web3 & Digital Assets", label: "Blockchain, Web3 & Digital Assets" },
+    { value: "Legal, Compliance & Governance", label: "Legal, Compliance & Governance" },
+    { value: "Accounting, Tax & Audit", label: "Accounting, Tax & Audit" },
+    { value: "Strategy & Management Consulting", label: "Strategy & Management Consulting" },
+    { value: "Real Estate & Infrastructure", label: "Real Estate & Infrastructure" },
+    { value: "Healthcare & Life Sciences", label: "Healthcare & Life Sciences" },
+    { value: "Manufacturing & Industrial", label: "Manufacturing & Industrial" },
+    { value: "Energy & Natural Resources", label: "Energy & Natural Resources" },
+    { value: "Agriculture & Food", label: "Agriculture & Food" },
+    { value: "Consumer Goods & Retail", label: "Consumer Goods & Retail" },
+    { value: "Luxury Goods & Lifestyle", label: "Luxury Goods & Lifestyle" },
+    { value: "Hospitality & Tourism", label: "Hospitality & Tourism" },
+    { value: "Logistics & Supply Chain", label: "Logistics & Supply Chain" },
+    { value: "Telecommunications", label: "Telecommunications" },
+    { value: "Media, Marketing & Communications", label: "Media, Marketing & Communications" },
+    { value: "Education & Training", label: "Education & Training" },
+    { value: "Non-Profit & Foundation", label: "Non-Profit & Foundation" },
+    { value: "Family Office", label: "Family Office" },
+    { value: "Other", label: "Other" }
   ];
+
+
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -381,7 +520,7 @@ const AuthScreen = ({ onLogin, currentLang, onLangChange }) => {
 
         {/* Footnote disclaimer info */}
         <p className="login-left-footnote">
-          &copy; 2026 The Corporate Hub. {t("footer.rights")}
+          &copy; 2026 The Corporate Hub, {t("footer.brandOf")} {t("footer.rights")}
         </p>
       </div>
 
@@ -468,7 +607,7 @@ const AuthScreen = ({ onLogin, currentLang, onLangChange }) => {
                   <Input label={t("portal.orgName")} value={form.orgName} onChange={f("orgName")} placeholder="Acme Corporation Ltd" />
                   <Select label={t("portal.orgType")} value={form.orgType} onChange={f("orgType")} options={orgTypes} />
                   <Select label={t("portal.sector")} value={form.sector} onChange={f("sector")} options={sectors} />
-                  <Input label={t("portal.country")} value={form.country} onChange={f("country")} placeholder="United Kingdom" />
+                  <SearchableSelect label={t("portal.country")} value={form.country} onChange={(val) => setForm(p => ({ ...p, country: val }))} options={countries} placeholder="Select Country..." />
 
                   <Btn variant="primary" style={{ width: "100%", justifyContent: "center", padding: "12px", marginTop: "1rem" }} size="lg"
                     onClick={() => { if (form.orgName && form.country) setStep(2); }}>

@@ -152,7 +152,7 @@
     "btnSend": "Send Message",
     "successTitle": "Submission Received",
     "successDescMembership": "Your application for membership has been submitted. The Corporate Hub administrator will review details and send an email within 2 business days.",
-    "successDescContact": "Thank you for contacting us. Your message has been sent successfully. An advisor will get back to you shortly.",
+    "successDescContact": "Thank you for contacting us. Your message has been sent successfully. A member of the team will get back to you shortly.",
     "demoNote": "Demo note: For previewing, you can instantly test the Private Portal by using any email.",
     "btnProceed": "Proceed to Portal Demo",
     "btnClose": "Close"
